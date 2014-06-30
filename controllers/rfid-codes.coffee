@@ -4,16 +4,16 @@ module.exports = class RfidCodes extends Controller
 
   list: (done)->
     @rendered = true # We're handling rendering
-    #TODO Security! Need to check additional secret here. Secret should probably be set via a new admin view for rfidcodes
-    if true
-      @res.json 400, {errorCode: 400, errorMessage: "Invalid or no auth"}
+    secret = @plugin.get('apiSecret')
+    if !secret or @req.cookies.SECRET != secret
+      @res.json 401, {errorCode: 401, errorMessage: "Invalid or no auth"}
       return done()
     else
       keyholderRoleId = @plugin.get('trusteeRoleId') ? 1
       memberRoleId    = @plugin.get('memberRoleId') ? 1
-      @req.models.User.find().run(err, users) =>
+      @req.models.User.find().run (err, users) =>
         codes = {}
-        if(err)
+        if err
           @res.json 500, {errorCode: 500, errorMessage: err}
           console.log err
           return done(err)
@@ -38,16 +38,16 @@ module.exports = class RfidCodes extends Controller
 
               #stash back in the json
               codes[code] = thisCode
-            @res.json codes
+        @res.json codes
       return done()
 
-    settings: (done) ->
-      @data.memberRoleId ?= @plugin.get('memberRoleId') ? 1
-      @data.apiSecret ?= @plugin.get('apiSecret')
+  settings: (done) ->
+    @data.memberRoleId ?= @plugin.get('memberRoleId') ? 1
+    @data.apiSecret ?= @plugin.get('apiSecret')
 
-      if @req.method is 'POST'
-        @plugin.set {apiSecret: @data.apiSecret}
-      done()
+    if @req.method is 'POST'
+      @plugin.set {apiSecret: @data.apiSecret}
+    done()
 
 
 
