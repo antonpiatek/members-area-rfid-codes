@@ -7,7 +7,7 @@ module.exports = class RfidCodes extends Controller
   list: (done)->
     @rendered = true # We're handling rendering
     secret = @plugin.get('apiSecret')
-    if !secret or @req.cookies.SECRET != secret
+    if !secret?.length or @req.cookies.SECRET != secret
       @res.json 401, {errorCode: 401, errorMessage: "Invalid or no auth"}
       return done()
     else
@@ -29,7 +29,7 @@ module.exports = class RfidCodes extends Controller
 
               #might manage to share an id (so deal with it)
               if thisCode.username
-                thisCode.username += " and "+u.username 
+                thisCode.username += " and "+u.username
                 thisCode.fullname += " and "+u.fullname
               else
                 thisCode.username = u.username
