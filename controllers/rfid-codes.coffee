@@ -1,6 +1,7 @@
 Controller = require 'members-area/app/controller'
 
 module.exports = class RfidCodes extends Controller
+  @before 'loadRoles', only: ['settings']
 
   list: (done)->
     @rendered = true # We're handling rendering
@@ -9,8 +10,8 @@ module.exports = class RfidCodes extends Controller
       @res.json 401, {errorCode: 401, errorMessage: "Invalid or no auth"}
       return done()
     else
-      keyholderRoleId = @plugin.get('trusteeRoleId') ? 1
       memberRoleId    = @plugin.get('memberRoleId') ? 1
+      keyholderRoleId = @plugin.get('keyholderRoleId') ? 2
       @req.models.User.find().run (err, users) =>
         codes = {}
         if err
@@ -43,11 +44,15 @@ module.exports = class RfidCodes extends Controller
 
   settings: (done) ->
     @data.memberRoleId ?= @plugin.get('memberRoleId') ? 1
+    @data.keyholderRoleId ?= @plugin.get('keyholderRoleId') ? 2
     @data.apiSecret ?= @plugin.get('apiSecret')
+    @data.memberRoleId = parseInt(@data.memberRoleId, 10)
+    @data.keyholderRoleId = parseInt(@data.keyholderRoleId, 10)
 
     if @req.method is 'POST'
-      @plugin.set {apiSecret: @data.apiSecret}
+      @plugin.set {apiSecret: @data.apiSecret, memberRoleId: @data.memberRoleId, keyholderRoleId: @data.keyholderRoleId}
     done()
 
-
-
+  loadRoles: (done) ->
+    @req.models.Role.find (err, @roles) =>
+      done(err)
