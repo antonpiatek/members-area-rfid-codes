@@ -1,6 +1,7 @@
 Controller = require 'members-area/app/controller'
 
 module.exports = class RfidCodes extends Controller
+  @before 'ensureAdmin', only: ['settings']
   @before 'loadRoles', only: ['settings']
 
   list: (done)->
@@ -56,3 +57,7 @@ module.exports = class RfidCodes extends Controller
   loadRoles: (done) ->
     @req.models.Role.find (err, @roles) =>
       done(err)
+
+  ensureAdmin: (done) ->
+    return done new @req.HTTPError 403, "Permission denied" unless @req.user.can('admin')
+    done()
