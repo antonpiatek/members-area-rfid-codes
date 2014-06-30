@@ -68,8 +68,6 @@ module.exports =
 
   processRfid: (done) ->
     return done() unless @loggedInUser.can('admin')
-    #this code runs in the context of the person controller instance, NOT this plugin
-    #TODO: Security? Do we need to check the user is allowed to call us?
     if @req.method is 'POST' and @req.body.addNewRfid
       @user.addRfidCode(@req.body.rfid)
       @user.save done
