@@ -3,8 +3,10 @@ PersonController = require 'members-area/app/controllers/person'
 module.exports =
   initialize: (done) ->
     @app.addRoute 'all' , '/rfidcodes' , 'members-area-rfid-codes#rfid-codes#list'
+    @app.addRoute 'all', '/settings/rfid-codes', 'members-area-rfid-codes#rfid-codes#settings'
     @hook 'render-person-view' , @modifyUserPage.bind(this)
     @hook 'models:initialize', @modifyUserModel.bind(this)
+    @hook 'navigation_items', @modifyNavigationItems.bind(this)
     PersonController.before @processRfid, only: ['view']
     done()
 
@@ -89,3 +91,13 @@ module.exports =
       if index >= 0
         @rfidcodes.splice(index, 1)
         @setMeta rfidcodes: @rfidcodes
+
+  modifyNavigationItems: ({addItem}) ->
+    addItem 'settings',
+      title: 'RFID codes'
+      id: 'members-area-rfid-codes-settings'
+      href: '/settings/rfid-codes'
+      priority: 20
+      permissions: ['admin']
+    return
+  

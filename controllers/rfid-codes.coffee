@@ -40,3 +40,14 @@ module.exports = class RfidCodes extends Controller
                             codes[code] = thisCode
                 @res.json codes
         return done()
+
+    settings: (done) ->
+      @data.memberRoleId ?= @plugin.get('memberRoleId') ? 1
+      @data.apiSecret ?= @plugin.get('apiSecret')
+
+      if @req.method is 'POST'
+        @plugin.set {apiSecret: @data.apiSecret}
+      done()
+
+
+
