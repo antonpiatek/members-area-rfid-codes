@@ -1,17 +1,17 @@
 Controller = require 'members-area/app/controller'
 
 module.exports = class RfidCodes extends Controller
+
     list: (done)->
         @rendered = true # We're handling rendering
         #TODO Security! Need to check additional secret here. Secret should probably be set via a new admin view for rfidcodes
-        if false
+        if true
             @res.json 400, {errorCode: 400, errorMessage: "Invalid or no auth"}
             return done()
         else
-            @req.models.User.find()
-            #TODO: Filter to only approved users
-            .where("1")
-            .run (err, users) =>
+            keyholderRoleId = @plugin.get('trusteeRoleId') ? 1
+            memberRoleId    = @plugin.get('memberRoleId') ? 1
+            @req.models.User.find().run(err, users) =>
                 codes = {}
                 if(err)
                     @res.json 500, {errorCode: 500, errorMessage: err}
@@ -33,10 +33,8 @@ module.exports = class RfidCodes extends Controller
                                thisCode.username = u.username
                                thisCode.fullname = u.fullname
 
-                            #get all roles
-                            thisCode.roles ?= []
-                            #TODO: How do we get what roles this user belongs to
-                            #Or do we just want to check for a specific role (canOpenSpace) and send that?
+                            thisCode.keyholder = (keyholderRoleId in u.activeRoleIds)
+                            thisCode.member = (memberRoleId in u.activeRoleIds)
 
                             #stash back in the json
                             codes[code] = thisCode
