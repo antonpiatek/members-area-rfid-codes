@@ -4,6 +4,44 @@ module.exports = class RfidCodes extends Controller
   @before 'ensureAdmin', only: ['settings']
   @before 'loadRoles', only: ['settings']
 
+  open: (done) ->
+    @rendered = true # We're handling rendering
+    secret = @plugin.get('apiSecret')
+    error = (code, object) =>
+      @res.json code, object
+      return done()
+    if !secret?.length or @req.cookies.SECRET != secret
+      return error 401, {errorCode: 401, errorMessage: "Invalid or no auth"}
+    else
+      {rfidcode, user_id, location, successful} = @req.body
+      whenScanned = @req.body.when
+
+      rfidcode = String(rfidcode ? "")
+      user_id = parseInt(user_id ? 0, 10) if user_id?
+      location = String(location ? "")
+      successful = !!(String(successful ? "1") isnt "0")
+      whenScanned = new Date(parseInt(whenScanned, 10))
+
+      return error 400, {errorCode: 400, errorMessage: "No code specified"} unless rfidcode?.length
+      return error 400, {errorCode: 400, errorMessage: "Invalid user_id"} unless !user_id? or (isFinite(user_id) and user_id > 0)
+      return error 400, {errorCode: 400, errorMessage: "No location specified"} unless location?.length
+      return error 400, {errorCode: 400, errorMessage: "Invalid date"} unless whenScanned.getFullYear() >= 2014
+
+      entry =
+        rfidcode: rfidcode
+        user_id: user_id
+        location: location
+        successful: successful
+        when: whenScanned
+
+      @req.models.Rfidscan.create [entry], (err) =>
+        if err
+          console.error "ERROR OCCURRED SAVING RFIDSCAN"
+          console.dir err
+          return error 500, "Could not create model"
+        @res.json {success: true}
+        done()
+
   list: (done)->
     @rendered = true # We're handling rendering
     secret = @plugin.get('apiSecret')
@@ -31,9 +69,11 @@ module.exports = class RfidCodes extends Controller
               if thisCode.username
                 thisCode.username += " and "+u.username
                 thisCode.fullname += " and "+u.fullname
+                delete thisCode.user_id
               else
                 thisCode.username = u.username
                 thisCode.fullname = u.fullname
+                thisCode.user_id = u.id
 
               thisCode.keyholder = (keyholderRoleId in u.activeRoleIds)
               thisCode.member = (memberRoleId in u.activeRoleIds)

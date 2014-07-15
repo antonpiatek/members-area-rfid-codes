@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "Plugin for members-area to store rfid entry codes per-user and retrieve them",
   "main": "index.coffee",
-  "dependencies": {},
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: I need some tests!\" && exit 1"
@@ -20,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/antonpiatek/members-area-rfid-codes/issues"
   },
-  "homepage": "https://github.com/antonpiatek/members-area-rfid-codes"
+  "homepage": "https://github.com/antonpiatek/members-area-rfid-codes",
+  "dependencies": {
+    "async": "^0.7.0"
+  }
 }

@@ -4,9 +4,12 @@ module.exports =
   initialize: (done) ->
     @app.addRoute 'all' , '/rfidcodes' , 'members-area-rfid-codes#rfid-codes#list'
     @app.addRoute 'all', '/settings/rfid-codes', 'members-area-rfid-codes#rfid-codes#settings'
+    @app.addRoute 'post' , '/rfidcodes/open' , 'members-area-rfid-codes#rfid-codes#open'
     @hook 'render-person-view' , @modifyUserPage.bind(this)
     @hook 'models:initialize', @modifyUserModel.bind(this)
     @hook 'navigation_items', @modifyNavigationItems.bind(this)
+    @hook 'models:initialize', ({models}) =>
+      models.Rfidscan.hasOne 'user', models.User, reverse: 'rfidscan'
     PersonController.before @processRfid, only: ['view']
     done()
 
