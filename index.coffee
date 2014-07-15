@@ -80,7 +80,7 @@ module.exports =
   modifyUserModel: (options) ->
     options.models.User.instanceProperties.rfidcodes =
       get: ->
-        @meta.rfidcodes ? []
+        @meta.rfidcodes ?= []
     options.models.User.instanceMethods.addRfidCode = (newCode) ->
       @rfidcodes.push(newCode) unless newCode in @rfidcodes
       @setMeta rfidcodes: @rfidcodes
@@ -98,4 +98,3 @@ module.exports =
       priority: 20
       permissions: ['admin']
     return
-  
