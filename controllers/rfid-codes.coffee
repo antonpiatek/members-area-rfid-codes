@@ -102,9 +102,8 @@ module.exports = class RfidCodes extends Controller
   loadScans: (done) ->
     @req.models.Rfidscan.find().order('-id').limit(50).run (err, @scans) =>
       return done err if err
-      userIds = (scan.user_id for scan in @scans)
-      userIds = _.filter userIds, (a) -> a > 0
-      userIds = _.uniq userIds
+      userIds = []
+      userIds.push scan.user_id for scan in @scans when scan.user_id > 0 and scan.user_id not in userIds
       @req.models.User.find().where("id in (#{userIds.join(", ")})").run (err, users) =>
         return done err if err
         userById = {}
