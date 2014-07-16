@@ -3,6 +3,7 @@ Controller = require 'members-area/app/controller'
 module.exports = class RfidCodes extends Controller
   @before 'ensureAdmin', only: ['settings']
   @before 'loadRoles', only: ['settings']
+  @before 'loadScans', only: ['settings']
 
   open: (done) ->
     @rendered = true # We're handling rendering
@@ -97,6 +98,20 @@ module.exports = class RfidCodes extends Controller
   loadRoles: (done) ->
     @req.models.Role.find (err, @roles) =>
       done(err)
+
+  loadScans: (done) ->
+    @req.models.Rfidscan.find().order('-id').limit(50).run (err, @scans) =>
+      return done err if err
+      userIds = (scan.user_id for scan in @scans)
+      userIds = _.filter userIds, (a) -> a > 0
+      userIds = _.uniq userIds
+      @req.models.User.find().where("id in (#{userIds.join(", ")})").run (err, users) =>
+        return done err if err
+        userById = {}
+        userById[user.id] = user for user in users
+        for scan in @scans
+          scan.user = userById[scan.user_id]
+        done(err)
 
   ensureAdmin: (done) ->
     return done new @req.HTTPError 403, "Permission denied" unless @req.user.can('admin')

@@ -29,3 +29,20 @@ block content
     .control-group
       .controls
         button.btn-success(type="Submit") Save
+
+  h3 Recent accesses
+  table.table
+    tr
+      th When
+      th Location
+      th Code
+      th User
+    each scan in scans
+      tr
+        td= scan.when.toISOString()
+        td= scan.location
+        td= scan.rfidcode
+        if scan.user
+          td #{scan.user.fullname} (#{scan.user.username})
+        else
+          td -
