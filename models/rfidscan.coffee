@@ -24,6 +24,7 @@ module.exports = (db, models) ->
     when:
       type: 'date'
       required: true
+      time: true
 
     meta:
       type: 'object'

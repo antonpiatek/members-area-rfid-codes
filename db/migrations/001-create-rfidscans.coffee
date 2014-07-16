@@ -28,6 +28,7 @@ module.exports =
       when:
         type: 'date'
         required: true
+        time: true
 
       meta:
         type: 'object'
