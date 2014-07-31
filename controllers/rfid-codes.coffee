@@ -113,5 +113,6 @@ module.exports = class RfidCodes extends Controller
         done(err)
 
   ensureAdmin: (done) ->
+    return @redirectTo "/login?next=#{encodeURIComponent @req.path}" unless @req.user?
     return done new @req.HTTPError 403, "Permission denied" unless @req.user.can('admin')
     done()
